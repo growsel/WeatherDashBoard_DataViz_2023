@@ -27,16 +27,51 @@
 <body>
     <h3 class="name">Trần Cao Bảo Phúc</h3>
     <h4 class="student_id">ITITIU19185</h4>
-    <h4 class="course_title">Data science and data visualization</h4>
-    <h4 class="lab_title">Lab 8 –D3.js – GeoMapping</h4>
+    <h4 class="course_title">Data science and data visualization project</h4>
+    <!-- <h4 class="lab_title">Lab 8 –D3.js – GeoMapping</h4> -->
     <p>This is all my own work. I did not copy the code from any other source.</p>
+    <p>
+      <button type="button" onclick="demo_object.next_date()">Next Day</button>
+      <button type="button" onclick="demo_object.prev_date()">Prev Day</button>
+      <button type="button" id="today+0" onclick="demo_object.set_date(0)">// Today //</button>
+      <button type="button" id="today+1" onclick="demo_object.set_date(1)">// Today+1 //</button>
+      <button type="button" id="today+2" onclick="demo_object.set_date(2)">// Today+2 //</button>
+      <button type="button" id="today+3" onclick="demo_object.set_date(3)">// Today+3 //</button>
+      <button type="button" id="today+4" onclick="demo_object.set_date(4)">// Today+4 //</button>
+      <button type="button" id="today+5" onclick="demo_object.set_date(5)">// Today+5 //</button>
+      <button type="button" id="today+6" onclick="demo_object.set_date(6)">// Today+6 //</button>
 
-    <svg id="svg_1" width="1000" height="1000"></svg>
+      <text>Color Mode</text>
+      <select id="sortKeys" onchange="sortKeyUpdate()">
+        <option value="ma">ID</option>
+        <option value="province">Name</option>
+        <option value="area">Area</option>
+        <option value="population">Population</option>
+        <option value="density">Density</option>
+        <option value="GRDP-VND">GRDP-VND</option>
+        <!-- <option value="GRDP-USD">GRDP-USD</option> -->
+      </select>
+      <text>Mode</text>
+      <select id="sortOrders" onchange="sortOrderUpdate()">
+        <option value="ascending">ascending</option>
+        <option value="descending">descending</option>
+      </select>
+    <p>
+     
+
+    <svg id="map_svg" width="1000" height="1000"></svg>
     <br>
 
     <script type="text/javascript">
+      let date = new Date();
+      var day = parseInt(date.getDate())
+      var month = date.getMonth() + 1
+      for (var offset = 0; offset <= 6; offset++) {
+        document.getElementById(`today+${offset}`).textContent = `${day + offset}-${month}`;
+      }
+      demo_object = new weather_class();
 
-
+      // var next_day_button = d3.select("#svg_1")
 
     </script>
   </body>

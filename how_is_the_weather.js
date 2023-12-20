@@ -56,20 +56,20 @@ class weather_class {
 			var geoUrl = `http://api.openweathermap.org/geo/1.0/direct?q=${d.name},${d.country_code}&limit=1&appid=${this.apikey}`
 			var geo_res = await fetch(geoUrl);
 			var geo_data = await geo_res.json();
-			console.log(d.name, geo_data)
+			// console.log(d.name, geo_data)
 			d.lat = geo_data[0].lat;
 			d.lon = geo_data[0].lon;
 
 
 			var amount_of_day = 7;
-			var language = 'vi';
+			var language = 'en';
 			var units = 'metric';
 			var forecastUrl = `http://api.openweathermap.org/data/2.5/forecast/daily?lat=${d.lat}&lon=${d.lon}&appid=${this.apikey}&units=${units}&lang=${language}&cnt=${amount_of_day}`;
 			var res = await fetch(forecastUrl);
 			var data = await res.json();
 			d.data = data.list
 		}));
-		this.load_svg()
+		this.load_map()
 		
 	};
 
@@ -85,19 +85,34 @@ class weather_class {
 
 
 	next_date(){
-		this.date += 1
+		if(this.date < 6){
+			this.date +=1;
+			// console.log(this.date);
+			this.reload_map();
+		}
 	}
 	prev_date(){
-		this.date -=1
+		if(this.date >= 1){
+			this.date -=1;
+			// console.log(this.date);
+			this.reload_map();
+		}
+	}
+	set_date(input_int){
+		if(input_int >= 0 && input_int <= 6){
+			this.date = input_int;
+			console.log(this.date);
+			this.reload_map();
+		}
 	}
 
 
-	load_svg() {
+	load_map() {
 		var json = this.json;
 		
 
 		// The svg
-		var svg = d3.select("#svg_1")
+		var svg = d3.select("#map_svg")
 		var width = svg.attr("width");
 		var height = svg.attr("height");
 
@@ -118,10 +133,16 @@ class weather_class {
 		// console.log("provinces_data",provinces_data);
 		// console.log("map_dat", json);
 		json.features.forEach(d => {
-			console.log(d)
+			// console.log(d)
 			d.today_weather =  d.data[this.date]
+			if (d.today_weather.rain){
+
+			} else {
+				d.today_weather.rain = "N/A"
+			}
 		})
 		svg.append("g")
+			.attr("id","the_map")
 			.selectAll("path")
 			.data(json.features)
 			.enter().append("path")
@@ -131,6 +152,11 @@ class weather_class {
 			.attr("night_temp", d => d.today_weather.feels_like.night)
 			.attr("eve_temp", d => d.today_weather.feels_like.eve)
 			.attr("mor_temp", d => d.today_weather.feels_like.morn)
+			.attr("humidity", d => d.today_weather.humidity)
+			.attr("weather", d => d.today_weather.weather.description)
+			.attr("rain_prob", d => d.today_weather.pop)
+			.attr("cloud", d => d.today_weather.clouds)
+			.attr("rain", d => d.today_weather.rain)
 			.attr("fill", d => this.temp_color(d.today_weather.feels_like.day))
 			.style("stroke", "#000")
 			.attr("stroke-width", "0.2");
@@ -151,9 +177,8 @@ class weather_class {
 				tooltip.style("visibility", "visible");
 
 
-
 				// Set the tooltip content
-				tooltip.html("<h1>"+d3.select(this).attr("name") + "</h1><br><h2>Temperature</h2><br><h3>  Day: " + parseInt(d3.select(this).attr("day_temp")).toLocaleString() + "</h3><br><h3>  Night: " + parseInt(d3.select(this).attr("night_temp")).toLocaleString())+"</h3>";
+				tooltip.html("<h1>"+d3.select(this).attr("name") + "</h1><h2>Temperature</h2><h3>  Day: " + parseInt(d3.select(this).attr("day_temp")).toLocaleString() + "</h3><h3>  Rain: " + d3.select(this).attr("rain"))+"</h3>";
 				// tooltip.html("Country/Region: " );
 			})
 			.on("mouseout", function(d) {
@@ -162,6 +187,63 @@ class weather_class {
 			});
 	};
 
+	reload_map() {
+		var json = this.json;
+		
+
+		// The svg
+		var svg = d3.select("#map_svg")
+		var width = svg.attr("width");
+		var height = svg.attr("height");
+
+		var center = d3.geoCentroid(json)
+		// center = [Math.round(center[0]),Math.round(center[1])]
+
+		var scale = 3000;
+		var offset = [width / 2, height / 2];
+
+
+
+		var projection = d3.geoMercator()
+			.scale(scale)
+			.center(center)
+			.translate(offset);
+		var de_path = d3.geoPath().projection(projection)
+
+		// console.log("provinces_data",provinces_data);
+		// console.log("map_dat", json);
+		json.features.forEach(d => {
+			// console.log(d)
+			d.today_weather =  d.data[this.date]
+			if (d.today_weather.rain){
+
+			} else {
+				d.today_weather.rain = "N/A"
+			}
+		})
+		var the_map = d3.select("#the_map");
+		the_map.selectAll("path")
+			.data(json.features)
+			.join("path")
+			.attr("d", de_path)
+			.attr("name", d => d.vietnamese_name)
+			.attr("day_temp", d => d.today_weather.feels_like.day)
+			.attr("night_temp", d => d.today_weather.feels_like.night)
+			.attr("eve_temp", d => d.today_weather.feels_like.eve)
+			.attr("mor_temp", d => d.today_weather.feels_like.morn)
+			.attr("humidity", d => d.today_weather.humidity)
+			.attr("weather", d => d.today_weather.weather.description)
+			.attr("rain_prob", d => d.today_weather.pop)
+			.attr("cloud", d => d.today_weather.clouds)
+			.attr("rain", d => d.today_weather.rain)
+			.attr("fill", d => this.temp_color(d.today_weather.feels_like.day))
+			.style("stroke", "#000")
+			.attr("stroke-width", "0.2");
+
+		
+
+		
+	};
 
 	temp_color(input_number) {
 		if (input_number > 41) {
@@ -196,4 +278,3 @@ class weather_class {
 	};
 }
 
-demo_object = new weather_class();
