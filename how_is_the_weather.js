@@ -116,10 +116,24 @@ class weather_class {
 		var width = svg.attr("width");
 		var height = svg.attr("height");
 
+		let zoom = d3.zoom()
+			.scaleExtent([1, 5])
+			.translateExtent([[0, 0], [width, height]])
+			.on('zoom', handleZoom);
+
+		d3.select('#map_svg')
+			.call(zoom);
+		
+
+		function handleZoom(e) {
+			d3.select('#the_map')
+				.attr('transform', e.transform);
+		}
 		var center = d3.geoCentroid(json)
 		// center = [Math.round(center[0]),Math.round(center[1])]
 
-		var scale = 3000;
+		var scale = height*3;
+		
 		var offset = [width / 2, height / 2];
 
 
@@ -199,7 +213,8 @@ class weather_class {
 		var center = d3.geoCentroid(json)
 		// center = [Math.round(center[0]),Math.round(center[1])]
 
-		var scale = 3000;
+		var scale = height*3;
+		
 		var offset = [width / 2, height / 2];
 
 
