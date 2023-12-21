@@ -61,10 +61,8 @@ class weather_class {
 			d.lon = geo_data[0].lon;
 
 
-			var amount_of_day = 7;
-			var language = 'en';
-			var units = 'metric';
-			var forecastUrl = `http://api.openweathermap.org/data/2.5/forecast/daily?lat=${d.lat}&lon=${d.lon}&appid=${this.apikey}&units=${units}&lang=${language}&cnt=${amount_of_day}`;
+			
+			var forecastUrl = `http://api.openweathermap.org/data/2.5/forecast/daily?lat=${d.lat}&lon=${d.lon}&appid=${this.apikey}&units=${this.units}&lang=${this.language}&cnt=${this.amount_of_day}`;
 			var res = await fetch(forecastUrl);
 			var data = await res.json();
 			d.data = data.list
@@ -80,55 +78,109 @@ class weather_class {
 		this.load_data();
 		this.date = 0;
 		this.display_param = "" 
+		this.amount_of_day = 16;
+		this.language = 'en';
+		this.units = 'metric';
 
+		var map_svg = d3.select("#map_svg")
+		this.map_width = map_svg.attr("width");
+		this.map_height = map_svg.attr("height");
+
+		this.zoom = d3.zoom()
+			.scaleExtent([1, 5])
+			.translateExtent([[0, 0], [this.map_width, this.map_height]])
+			.on('zoom', this.handleZoom);
+
+		d3.select('#map_svg')
+			.call(this.zoom);
+		
+
+		// function 
 	}
 
 
 	next_date(){
-		if(this.date < 6){
+		if(this.date < (this.amount_of_day - 1)){
 			this.date +=1;
-			// console.log(this.date);
+			document.getElementById("date_select").selectedIndex = `${this.date}`;
 			this.reload_map();
 		}
 	}
 	prev_date(){
 		if(this.date >= 1){
 			this.date -=1;
-			// console.log(this.date);
+			document.getElementById("date_select").selectedIndex = `${this.date}`;
 			this.reload_map();
 		}
 	}
-	set_date(input_int){
-		if(input_int >= 0 && input_int <= 6){
+	set_date(){
+		let input_int = parseInt(document.getElementById("date_select").value);
+		if(input_int >= 0 && input_int <= (this.amount_of_day - 1) ){
 			this.date = input_int;
 			console.log(this.date);
 			this.reload_map();
 		}
 	}
 
+	handleZoom(e) {
+		d3.select('#the_map')
+			.attr('transform', e.transform);
+	}
+
+	zoomIn() {
+		d3.select('svg')
+			.transition()
+			.call(this.zoom.scaleBy, 2);
+	}
+
+	zoomOut() {
+		d3.select('svg')
+			.transition()
+			.call(this.zoom.scaleBy, 0.5);
+	}
+
+	resetZoom() {
+		d3.select('svg')
+			.transition()
+			.call(this.zoom.scaleTo, 1);
+	}
+
+	center() {
+		d3.select('svg')
+			.transition()
+			.call(this.zoom.translateTo, 0.5 * this.map_width, 0.5 * this.map_height);
+	}
+
+	panLeft() {
+		d3.select('svg')
+			.transition()
+			.call(this.zoom.translateBy, -50, 0);
+	}
+	
+	panRight() {
+		d3.select('svg')
+			.transition()
+			.call(this.zoom.translateBy, 50, 0);
+	}
+	panUp() {
+		d3.select('svg')
+			.transition()
+			.call(this.zoom.translateBy, 0, 50);
+	}
+	panDown() {
+		d3.select('svg')
+			.transition()
+			.call(this.zoom.translateBy, 0, -50);
+	}
 
 	load_map() {
 		var json = this.json;
 		
 
-		// The svg
 		var svg = d3.select("#map_svg")
 		var width = svg.attr("width");
 		var height = svg.attr("height");
 
-		let zoom = d3.zoom()
-			.scaleExtent([1, 5])
-			.translateExtent([[0, 0], [width, height]])
-			.on('zoom', handleZoom);
-
-		d3.select('#map_svg')
-			.call(zoom);
-		
-
-		function handleZoom(e) {
-			d3.select('#the_map')
-				.attr('transform', e.transform);
-		}
 		var center = d3.geoCentroid(json)
 		// center = [Math.round(center[0]),Math.round(center[1])]
 
@@ -175,14 +227,14 @@ class weather_class {
 			.style("stroke", "#000")
 			.attr("stroke-width", "0.2");
 
-		var tooltip = d3.select("body")
-			.append("div")
-			.attr("class", "tooltip")
-			.attr("id","tooltip")
-			.style("position", "fixed")
-			.style("visibility", "hidden")
-			.style("top", "0")
-			.style("right", "0");
+		var tooltip = d3.select(".tooltip")
+			// .append("div")
+			// .attr("class", "tooltip")
+			// .attr("id","tooltip")
+			// .style("position", "fixed")
+			// .style("visibility", "hidden")
+			// .style("top", "0")
+			// .style("right", "0");
 
 		svg.selectAll("path")
 			.on("mouseover", function(event) {

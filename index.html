@@ -1,78 +1,119 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
+	<meta charset="utf-8">
 
-  <title>Data Viz Project</title>
+	<title>Data Viz Project</title>
 
-    <script src="https://d3js.org/d3.v7.js"></script>
-    <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
-    <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
-    <script src="./how_is_the_weather.js"></script>
-  <style>
-    .tooltip {
-  border: 5px outset lightgray;
-  background-color: lightgrey;
-  font-size: 20px;
-  font-family: "Cormorant Garamond", serif;
-  border-radius: 9px;
-/*  text-align: center;*/
-}
+		<script src="https://d3js.org/d3.v7.js"></script>
+		<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+		<script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
+		<script src="./how_is_the_weather.js"></script>
+	<style>
+		@import url('https://fonts.googleapis.com/css2?family=Victor+Mono:ital,wght@0,100;0,600;1,500;1,700&display=swap');
 
 
+		* {
+			font-family: 'Victor Mono', monospace;
+		  margin: 0;
+		  padding: 0;
+		}
+
+		.tooltip {
+			border: 5px outset lightgray;
+			background-color: lightgrey;
+			font-size: 20px;
+/*      font-family: "Cormorant Garamond", serif;*/
+			border-radius: 9px;
+
+		}
+
+		.inline { 
+			display: inline-block; 
+			border: 1px solid red; 
+			margin:10px;
+			top: 0; 
+		}
+
+		div,table, th, td {
+			border:1px solid black;
+		}
+		.tooltip{
+/*			position: fixed;*/
+			visibility: 
+			hidden; 
+/*			top: 0px; */
+/*			right: 0px;*/
+		}
 
 
-  </style>
+	</style>
 </head>
 <body>
-    <h3 class="name">Trần Cao Bảo Phúc</h3>
-    <h4 class="student_id">ITITIU19185</h4>
-    <h4 class="course_title">Data science and data visualization project</h4>
-    <!-- <h4 class="lab_title">Lab 8 –D3.js – GeoMapping</h4> -->
-    <p>This is all my own work. I did not copy the code from any other source.</p>
-    <p>
-      <button type="button" onclick="demo_object.next_date()">Next Day</button>
-      <button type="button" onclick="demo_object.prev_date()">Prev Day</button>
-      <button type="button" id="today+0" onclick="demo_object.set_date(0)">// Today //</button>
-      <button type="button" id="today+1" onclick="demo_object.set_date(1)">// Today+1 //</button>
-      <button type="button" id="today+2" onclick="demo_object.set_date(2)">// Today+2 //</button>
-      <button type="button" id="today+3" onclick="demo_object.set_date(3)">// Today+3 //</button>
-      <button type="button" id="today+4" onclick="demo_object.set_date(4)">// Today+4 //</button>
-      <button type="button" id="today+5" onclick="demo_object.set_date(5)">// Today+5 //</button>
-      <button type="button" id="today+6" onclick="demo_object.set_date(6)">// Today+6 //</button>
+		<!-- 
+			<h3 class="name">Trần Cao Bảo Phúc</h3>
+			<h4 class="student_id">ITITIU19185</h4>
+			<h4 class="course_title">Data science and data visualization project</h4>
+			<p>This is all my own work. I did not copy the code from any other source.</p> 
+		-->
+		<div>
+			
+			<div class='inline'>
+				<svg id="map_svg" width="750" height="750"></svg>
+			</div>
+			<div class='inline'>
+						<div class='inline'>
+							<table>
+							<tr>
+								<th colspan="3">
+										
+								</th>
+							</tr>
+							<tr>
+								<td><button type="button" onclick="weather_object.prev_date()">Prev Day</button></td>
+								<td><button type="button" onclick="weather_object.next_date()">Next Day</button></td>
+								<td>
+									<select id="date_select" onchange="weather_object.set_date()">
 
-      <text>Color Mode</text>
-      <select id="sortKeys" onchange="sortKeyUpdate()">
-        <option value="ma">ID</option>
-        <option value="province">Name</option>
-        <option value="area">Area</option>
-        <option value="population">Population</option>
-        <option value="density">Density</option>
-        <option value="GRDP-VND">GRDP-VND</option>
-        <!-- <option value="GRDP-USD">GRDP-USD</option> -->
-      </select>
-      <text>Mode</text>
-      <select id="sortOrders" onchange="sortOrderUpdate()">
-        <option value="ascending">ascending</option>
-        <option value="descending">descending</option>
-      </select>
-    <p>
-     
+									</select>
+								</td>
+							</tr>
+							<tr>
+								<td>Placeholder</td>
+								
+							</tr>
+						</table>
+						</div>
+						<div class='inline'>
+							<div class="tooltip" id="tooltip" >
+								
+							</div>
+						</div>
+						
+			</div>
+		</div>
 
-    <svg id="map_svg" width="750" height="750"></svg>
-    <br>
+		<script type="text/javascript">
+			const weekday = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+			let datetime = new Date();
+			
+			var date_select = document.getElementById('date_select');
+			for (var offset = 0; offset <= 15; offset++) {
+				var opt = document.createElement('option');
 
-    <script type="text/javascript">
-      let date = new Date();
-      var day = parseInt(date.getDate())
-      var month = date.getMonth() + 1
-      for (var offset = 0; offset <= 6; offset++) {
-        document.getElementById(`today+${offset}`).textContent = `${day + offset}-${month}`;
-      }
-      demo_object = new weather_class();
+				var date = parseInt(datetime.getDate());
+				var day = weekday[datetime.getDay()];
+				var month = datetime.getMonth() + 1;
+				opt.id = `today+${offset}`;
+				opt.value = offset;
+				opt.innerHTML  = `${day} ${date}/${month}`;
+				date_select.appendChild(opt);
+				datetime.setDate(datetime.getDate()+1)
+			}
+			weather_object = new weather_class();
 
-      // var next_day_button = d3.select("#svg_1")
+			// var next_day_button = d3.select("#svg_1")
 
-    </script>
-  </body>
+		</script>
+	</body>
 </html>
