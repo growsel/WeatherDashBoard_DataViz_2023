@@ -227,7 +227,7 @@ class weather_class {
 			.style("stroke", "#000")
 			.attr("stroke-width", "0.2");
 
-		var tooltip = d3.select(".tooltip")
+		var tooltip = d3.select(".toolTip")
 			// .append("div")
 			// .attr("class", "tooltip")
 			// .attr("id","tooltip")
@@ -241,6 +241,7 @@ class weather_class {
 				
 				// Show the tooltip
 				tooltip.style("visibility", "visible");
+				console.log(d3.select(this).attr("name"));
 
 
 				// Set the tooltip content
