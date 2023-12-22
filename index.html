@@ -1,102 +1,81 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 	<meta charset="utf-8">
-
 	<title>Data Viz Project</title>
-
-		<script src="https://d3js.org/d3.v7.js"></script>
-		<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
-		<script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
-
-		    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
-
-				<script src="./how_is_the_weather.js"></script>
-
+	<script src="https://d3js.org/d3.v7.js"></script>
+	<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+	<script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
+		integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+	<script src="./how_is_the_weather.js"></script>
 	<style>
 		@import url('https://fonts.googleapis.com/css2?family=Victor+Mono:ital,wght@0,100;0,600;1,500;1,700&display=swap');
 
-
 		* {
 			font-family: 'Victor Mono', monospace;
-		  margin: 0;
-		  padding: 0;
+			margin: 0;
+			padding: 0;
 		}
 
 		.tooltip {
 			border: 5px outset lightgray;
 			background-color: lightgray;
 			font-size: 20px;
-/*      font-family: "Cormorant Garamond", serif;*/
 			border-radius: 9px;
-
+			visibility: hidden;
 		}
 
-		.inline { 
-			display: inline-block; 
-			border: 1px solid red; 
-			margin:10px;
-			top: 0; 
+		div {
+			border: 1px solid black;
 		}
-
-		div{
-			border:1px solid black;
-		}
-		.tooltip{
-/*			position: fixed;*/
-			visibility: 
-			hidden; 
-/*			top: 0px; */
-/*			right: 0px;*/
-		}
-
-
 	</style>
+
 </head>
+
 <body>
-		<!-- 
+	<!-- 
 			<h3 class="name">Trần Cao Bảo Phúc</h3>
 			<h4 class="student_id">ITITIU19185</h4>
 			<h4 class="course_title">Data science and data visualization project</h4>
 			<p>This is all my own work. I did not copy the code from any other source.</p> 
 		-->
 
-		<!-- <button type="button" onclick="weather_object.prev_date()">Prev Day</button>
+	<!-- <button type="button" onclick="weather_object.prev_date()">Prev Day</button>
 						<select id="date_select" onchange="weather_object.set_date()"></select>
 						<button type="button" onclick="weather_object.next_date()">Next Day</button> -->
 
-		<div class="container-fluid text-center">
-			<div class="row">
-				<div class="col-6">
-					<svg id="map_svg" width="750" height="750"></svg>
-					
-				</div>
-				<div class="col-6">
-					<div class="listButton">
-						
-						<div class = "col justify-content-center" >
-							<button type="button" onclick="weather_object.prev_date()">Prev Day</button>
-							<select id="date_select" onchange="weather_object.set_date()"></select>
-							<button type="button" onclick="weather_object.next_date()">Next Day</button>
-						</div>
-					</div>
+	<div class="container-fluid text-center">
+		<div class="row">
 
-					<div class='inline'>
-							<div class="row toolTip">
-								<div class="col">col</div>
-								<div class="col">col</div>
-								<div class="col">col</div>
-								<div class="col">col</div>
-								</div>
-						</div>
-					
+			<!-- MAP -->
+			<div class="col-6">
+				<svg id="map_svg" width="750" height="750"></svg>
+			</div>
+			<!-- END -->
+
+			<!-- BUTTON AND TOOLTIP -->
+			<div class="col-6">
+				<div class="listButton">
+					<div class="col justify-content-center">
+						<button type="button" onclick="weather_object.prev_date()">Prev Day</button>
+						<select id="date_select" onchange="weather_object.set_date()"></select>
+						<button type="button" onclick="weather_object.next_date()">Next Day</button>
+					</div>
+				</div>
+				<div class='toolTip_area'>
+					<div class="row toolTip"></div>
 				</div>
 			</div>
-		</div> 
+			<!-- END -->
 
-		
+		</div>
+	</div>
 
-		<!-- <div>
+
+
+	<!-- <div>
 			<div class='inline'>
 				<svg id="map_svg" width="750" height="750"></svg>
 			</div>
@@ -128,28 +107,29 @@
 			</div>
 		</div> -->
 
-		<script type="text/javascript">
-			const weekday = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-			let datetime = new Date();
-			
-			var date_select = document.getElementById('date_select');
-			for (var offset = 0; offset <= 15; offset++) {
-				var opt = document.createElement('option');
+	<script type="text/javascript">
+		const weekday = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+		let datetime = new Date();
+		var date_select = document.getElementById('date_select');
+		for (var offset = 0; offset <= 15; offset++) {
+			var opt = document.createElement('option');
+			var date = parseInt(datetime.getDate());
+			var day = weekday[datetime.getDay()];
+			var month = datetime.getMonth() + 1;
+			opt.id = `today+${offset}`;
+			opt.value = offset;
+			opt.innerHTML = `${day} ${date}/${month}`;
+			date_select.appendChild(opt);
+			datetime.setDate(datetime.getDate() + 1)
+		}
+		// weather_object = new weather_class();
 
-				var date = parseInt(datetime.getDate());
-				var day = weekday[datetime.getDay()];
-				var month = datetime.getMonth() + 1;
-				opt.id = `today+${offset}`;
-				opt.value = offset;
-				opt.innerHTML  = `${day} ${date}/${month}`;
-				date_select.appendChild(opt);
-				datetime.setDate(datetime.getDate()+1)
-			}
-			weather_object = new weather_class();
+		// var next_day_button = d3.select("#svg_1")
 
-			// var next_day_button = d3.select("#svg_1")
+	</script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
+		integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
+		crossorigin="anonymous"></script>
+</body>
 
-		</script>
-		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
-	</body>
 </html>

@@ -238,7 +238,6 @@ class weather_class {
 
 		svg.selectAll("path")
 			.on("mouseover", function(event) {
-				
 				// Show the tooltip
 				tooltip.style("visibility", "visible");
 				console.log(d3.select(this).attr("name"));
